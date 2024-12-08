@@ -5,7 +5,7 @@
 
 Ce projet est une application mobile développée avec Flutter, qui reproduit le célèbre jeu 2048. L'objectif principal est d'apprendre à utiliser Flutter tout en créant un jeu amusant et interactif.
 
-![Capture d'écran du jeu 2048](https://github.com/Furoshaa/2048-flutter-game/blob/main/images/jeu.png?raw=true)
+<img src="https://github.com/Furoshaa/2048-flutter-game/blob/main/images/jeu.png?raw=true" alt="Capture d'écran du jeu 2048" width="600"/>
 
 ## Fonctionnalités
 
