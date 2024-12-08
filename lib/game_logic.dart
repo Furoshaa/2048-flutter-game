@@ -4,14 +4,19 @@ class Game2048 {
   List<List<int>> board;
   int moves = 0;
   bool gameOver = false;
+  bool won = false;
+  int objective;
   Random random = Random();
+  bool canMove = true;
 
-  Game2048() : board = List.generate(4, (_) => List.filled(4, 0));
+  Game2048({this.objective = 2048}) : board = List.generate(4, (_) => List.filled(4, 0));
 
   void newGame() {
     board = List.generate(4, (_) => List.filled(4, 0));
     moves = 0;
     gameOver = false;
+    won = false;
+    canMove = true;
     addNewTile();
     addNewTile();
   }
@@ -33,6 +38,7 @@ class Game2048 {
   }
 
   bool move(Direction direction) {
+    if (!canMove) return false;
     bool moved = false;
     
     switch (direction) {
@@ -54,6 +60,7 @@ class Game2048 {
       moves++;
       addNewTile();
       checkGameOver();
+      checkWin();
     }
 
     return moved;
@@ -158,6 +165,18 @@ class Game2048 {
       }
     }
     gameOver = true;
+  }
+
+  void checkWin() {
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        if (board[i][j] == objective) {
+          won = true;
+          canMove = false;
+          return;
+        }
+      }
+    }
   }
 }
 

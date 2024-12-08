@@ -33,6 +33,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   final Game2048 game = Game2048();
   int objective = 2048;
   late FocusNode _focusNode;
+  Map<String, Offset> _positions = {};
+  Direction? _lastDirection;
   
   @override
   void initState() {
@@ -70,15 +72,28 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
+    if (!game.canMove) return;
     if (event is RawKeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-        setState(() => game.move(Direction.up));
+        setState(() {
+          _lastDirection = Direction.up;
+          game.move(Direction.up);
+        });
       } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-        setState(() => game.move(Direction.down));
+        setState(() {
+          _lastDirection = Direction.down;
+          game.move(Direction.down);
+        });
       } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-        setState(() => game.move(Direction.left));
+        setState(() {
+          _lastDirection = Direction.left;
+          game.move(Direction.left);
+        });
       } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        setState(() => game.move(Direction.right));
+        setState(() {
+          _lastDirection = Direction.right;
+          game.move(Direction.right);
+        });
       }
     }
   }
@@ -101,6 +116,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
+  void _updateObjective(int newObjective) {
+    setState(() {
+      objective = newObjective;
+      game.objective = newObjective;
+      game.newGame();
+    });
+    Navigator.pop(context);
+  }
+
   void _showObjectiveDialog() {
     showDialog(
       context: context,
@@ -109,75 +133,33 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           title: const Text('Change Objective'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: [16, 32, 64, 128, 256, 512, 1024, 2048, 4096].map((value) => 
               ListTile(
-                title: const Text('16'),
-                onTap: () {
-                  setState(() => objective = 16);
-                  Navigator.pop(context);
-                },
+                title: Text('$value'),
+                onTap: () => _updateObjective(value),
               ),
-              ListTile(
-                title: const Text('32'),
-                onTap: () {
-                  setState(() => objective = 32);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('64'),
-                onTap: () {
-                  setState(() => objective = 64);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('128'),
-                onTap: () {
-                  setState(() => objective = 128);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('256'),
-                onTap: () {
-                  setState(() => objective = 256);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('512'),
-                onTap: () {
-                  setState(() => objective = 512);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('1024'),
-                onTap: () {
-                  setState(() => objective = 1024);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('2048'),
-                onTap: () {
-                  setState(() => objective = 2048);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('4096'),
-                onTap: () {
-                  setState(() => objective = 4096);
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+            ).toList(),
           ),
         );
       },
     );
+  }
+
+  Offset _getSlideOffset(int row, int col, Direction? direction) {
+    if (direction == null) return Offset.zero;
+    
+    switch (direction) {
+      case Direction.up:
+        return Offset(0, 0.2);
+      case Direction.down:
+        return Offset(0, -0.2);
+      case Direction.left:
+        return Offset(0.2, 0);
+      case Direction.right:
+        return Offset(-0.2, 0);
+      default:
+        return Offset.zero;
+    }
   }
 
   @override
@@ -262,17 +244,31 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               ),
               child: GestureDetector(
                 onVerticalDragEnd: (details) {
+                  if (!game.canMove) return;
                   if (details.velocity.pixelsPerSecond.dy < 0) {
-                    setState(() => game.move(Direction.up));
+                    setState(() {
+                      _lastDirection = Direction.up;
+                      game.move(Direction.up);
+                    });
                   } else {
-                    setState(() => game.move(Direction.down));
+                    setState(() {
+                      _lastDirection = Direction.down;
+                      game.move(Direction.down);
+                    });
                   }
                 },
                 onHorizontalDragEnd: (details) {
+                  if (!game.canMove) return;
                   if (details.velocity.pixelsPerSecond.dx < 0) {
-                    setState(() => game.move(Direction.left));
+                    setState(() {
+                      _lastDirection = Direction.left;
+                      game.move(Direction.left);
+                    });
                   } else {
-                    setState(() => game.move(Direction.right));
+                    setState(() {
+                      _lastDirection = Direction.right;
+                      game.move(Direction.right);
+                    });
                   }
                 },
                 child: GridView.builder(
@@ -288,20 +284,47 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     int row = index ~/ 4;
                     int col = index % 4;
                     int value = game.board[row][col];
+                    
+                    if (value == 0) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: getTileColor(0),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      );
+                    }
+
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeInOut,
                       decoration: BoxDecoration(
                         color: getTileColor(value),
                         borderRadius: BorderRadius.circular(4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 3,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Center(
-                        child: Text(
-                          value == 0 ? '' : value.toString(),
-                          style: TextStyle(
-                            fontSize: value > 512 ? 20 : 24,
-                            fontWeight: FontWeight.bold,
-                            color: getNumberColor(value),
+                        child: TweenAnimationBuilder(
+                          duration: const Duration(milliseconds: 200),
+                          tween: Tween<double>(begin: 0.5, end: 1),
+                          builder: (context, double scale, child) {
+                            return Transform.scale(
+                              scale: scale,
+                              child: child,
+                            );
+                          },
+                          child: Text(
+                            value.toString(),
+                            style: TextStyle(
+                              fontSize: value > 512 ? 20 : 24,
+                              fontWeight: FontWeight.bold,
+                              color: getNumberColor(value),
+                            ),
                           ),
                         ),
                       ),
@@ -347,7 +370,24 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Game Over! Final Score: ${game.moves}',
+                  'Game Over! Moves: ${game.moves}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            if (game.won)
+              Container(
+                margin: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade400,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'You Won! Moves: ${game.moves}',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
