@@ -1,16 +1,13 @@
-# game2048
+# Projet Flutter 2048
 
-A new Flutter project.
+## LP Métiers de l'informatique parcours Développement d'applications Web et Mobile
 
-## Getting Started
+Ce projet a été réalisé dans le cadre de ma licence professionnelle en informatique et à pour but d'expérimenter flutter.
 
-This project is a starting point for a Flutter application.
+## PRÉSENTATION
 
-A few resources to get you started if this is your first Flutter project:
+Le projet consiste à reproduire le célèbre [jeu 2048](https://fr.wikipedia.org/wiki/2048_(jeu_vid%C3%A9o)).
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## AUTEURS DU PROJET
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Rémi DIEU & Kyllian Levent
