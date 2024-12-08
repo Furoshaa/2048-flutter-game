@@ -103,17 +103,24 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   Color _lastDarkBackground = const Color(0xFF37474F);
   Color _lastDarkGrid = const Color(0xFF455A64);
   
+  late AnimationController _controller;
+  
   @override
   void initState() {
     super.initState();
     game.newGame();
     _focusNode = FocusNode();
     _currentTheme = _themes[0];
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
   }
 
   @override
   void dispose() {
     _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -508,36 +515,41 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeInOut,
-                      decoration: BoxDecoration(
-                        color: getTileColor(value),
-                        borderRadius: BorderRadius.circular(4),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 3,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: TweenAnimationBuilder(
-                          duration: const Duration(milliseconds: 200),
-                          tween: Tween<double>(begin: 0.5, end: 1),
-                          builder: (context, double scale, child) {
-                            return Transform.scale(
-                              scale: scale,
-                              child: child,
-                            );
-                          },
-                          child: Text(
-                            value.toString(),
-                            style: TextStyle(
-                              fontSize: value > 512 ? 20 : 24,
-                              fontWeight: FontWeight.bold,
-                              color: getNumberColor(value),
-                            ),
-                          ),
+                      child: TweenAnimationBuilder(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut,
+                        tween: Tween<double>(
+                          begin: 0.0,
+                          end: 1.0,
                         ),
+                        builder: (context, double value, child) {
+                          return Transform.scale(
+                            scale: 0.8 + (value * 0.2),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: getTileColor(game.board[row][col]),
+                                borderRadius: BorderRadius.circular(4),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${game.board[row][col]}',
+                                  style: TextStyle(
+                                    fontSize: game.board[row][col] > 512 ? 20 : 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: getNumberColor(game.board[row][col]),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
