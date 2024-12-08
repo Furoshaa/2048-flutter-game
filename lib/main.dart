@@ -100,6 +100,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     },
   ];
   
+  Color _lastDarkBackground = const Color(0xFF37474F);
+  Color _lastDarkGrid = const Color(0xFF455A64);
+  
   @override
   void initState() {
     super.initState();
@@ -277,9 +280,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 const Text('Dark mode', style: TextStyle(color: Colors.white)),
                 Switch(
                   value: _isDarkMode,
+                  activeColor: Colors.black,
+                  activeTrackColor: Colors.black45,
                   onChanged: (bool value) {
                     setState(() {
                       _isDarkMode = value;
+                      if (value) {
+                        _backgroundColor = _lastDarkBackground;
+                        _gridColor = _lastDarkGrid;
+                      } else {
+                        _backgroundColor = const Color(0xFFFAF8EF);
+                        _gridColor = const Color(0xFFBBADA0);
+                      }
                     });
                   },
                 ),
@@ -311,6 +323,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   setState(() {
                                     _backgroundColor = theme['background'];
                                     _gridColor = theme['grid'];
+                                    _lastDarkBackground = theme['background'];
+                                    _lastDarkGrid = theme['grid'];
                                   });
                                   Navigator.pop(context);
                                 },
