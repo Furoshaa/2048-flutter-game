@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game_logic.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
+class GameTheme {
+  final Color backgroundColor;
+  final Color gridColor;
+  final String name;
+
+  const GameTheme({
+    required this.backgroundColor,
+    required this.gridColor,
+    required this.name,
+  });
+}
 
 void main() {
   runApp(const MyApp());
@@ -36,11 +49,63 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   Map<String, Offset> _positions = {};
   Direction? _lastDirection;
   
+  Color _backgroundColor = const Color(0xFFFAF8EF);
+  Color _gridColor = const Color(0xFFBBADA0);
+  
+  final List<GameTheme> _themes = const [
+    GameTheme(
+      name: 'Classique',
+      backgroundColor: Color(0xFFFAF8EF),
+      gridColor: Color(0xFFBBADA0),
+    ),
+    GameTheme(
+      name: 'Sombre',
+      backgroundColor: Color(0xFF37474F),
+      gridColor: Color(0xFF455A64),
+    ),
+    GameTheme(
+      name: 'Pastel',
+      backgroundColor: Color(0xFFB5EAD7),
+      gridColor: Color(0xFFC7F0E3),
+    ),
+  ];
+  
+  late GameTheme _currentTheme;
+  
+  bool _isDarkMode = false;
+  
+  final Color _darkBackgroundColor = const Color(0xFF37474F);
+  final Color _darkGridColor = const Color(0xFF455A64);
+  
+  final List<Map<String, dynamic>> _darkThemes = [
+    {
+      'name': 'Sombre Classique',
+      'background': Color(0xFF37474F),
+      'grid': Color(0xFF455A64),
+    },
+    {
+      'name': 'Sombre Bleu',
+      'background': Color(0xFF1A237E),
+      'grid': Color(0xFF283593),
+    },
+    {
+      'name': 'Sombre Violet',
+      'background': Color(0xFF4A148C),
+      'grid': Color(0xFF6A1B9A),
+    },
+    {
+      'name': 'Full Dark',
+      'background': Colors.black,
+      'grid': Color(0xFF1C1C1C),
+    },
+  ];
+  
   @override
   void initState() {
     super.initState();
     game.newGame();
     _focusNode = FocusNode();
+    _currentTheme = _themes[0];
   }
 
   @override
@@ -162,6 +227,39 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
+  Future<Color?> showColorPicker({
+    required BuildContext context,
+    required Color initialColor,
+  }) async {
+    return showDialog<Color>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Choisir une couleur'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: initialColor,
+              onColorChanged: (Color color) {
+                initialColor = color;
+              },
+              pickerAreaHeightPercent: 0.8,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(initialColor),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return RawKeyboardListener(
@@ -169,11 +267,110 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       onKey: _handleKeyEvent,
       autofocus: true,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAF8EF),
+        backgroundColor: _backgroundColor,
         appBar: AppBar(
           backgroundColor: const Color(0xFF776E65),
           title: const Text('2048', style: TextStyle(color: Colors.white, fontSize: 28)),
           actions: [
+            Row(
+              children: [
+                const Text('Dark mode', style: TextStyle(color: Colors.white)),
+                Switch(
+                  value: _isDarkMode,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _isDarkMode = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            IconButton(
+              icon: const Icon(Icons.palette),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(_isDarkMode ? 'Thèmes sombres' : 'Personnalisation'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: _isDarkMode
+                            ? _darkThemes.map((theme) => ListTile(
+                                title: Text(theme['name']),
+                                trailing: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: theme['background'],
+                                    border: Border.all(color: Colors.white),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    _backgroundColor = theme['background'];
+                                    _gridColor = theme['grid'];
+                                  });
+                                  Navigator.pop(context);
+                                },
+                              )).toList()
+                            : [
+                                ListTile(
+                                  title: const Text('Couleur de fond'),
+                                  trailing: Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: _backgroundColor,
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    Color? color = await showColorPicker(
+                                      context: context,
+                                      initialColor: _backgroundColor,
+                                    );
+                                    if (color != null) {
+                                      setState(() => _backgroundColor = color);
+                                    }
+                                  },
+                                ),
+                                ListTile(
+                                  title: const Text('Couleur de la grille'),
+                                  trailing: Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: _gridColor,
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    Color? color = await showColorPicker(
+                                      context: context,
+                                      initialColor: _gridColor,
+                                    );
+                                    if (color != null) {
+                                      setState(() => _gridColor = color);
+                                    }
+                                  },
+                                ),
+                              ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Fermer'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.info_outline),
               onPressed: _showAboutDialog,
@@ -191,7 +388,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFBBADA0),
+                      color: _gridColor,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Column(
@@ -213,7 +410,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFBBADA0),
+                      color: _gridColor,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Column(
@@ -239,7 +436,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFBBADA0),
+                color: _gridColor,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: GestureDetector(
