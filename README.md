@@ -1,67 +1,67 @@
 ## LP Métiers de l'informatique parcours Développement d'applications Web et Mobile
-# Documentation du Projet Flutter 2048
+# Documentation for the Flutter 2048 Project
 
 ## Introduction
 
-Ce projet est une application mobile développée avec Flutter, qui reproduit le célèbre jeu 2048. L'objectif principal est d'apprendre à utiliser Flutter tout en créant un jeu amusant et interactif.
+This project is a mobile application developed with Flutter, replicating the famous 2048 game. The main objective is to learn how to use Flutter while creating a fun and interactive game.
 
-<img src="https://github.com/Furoshaa/2048-flutter-game/blob/main/images/jeu.png?raw=true" alt="Capture d'écran du jeu 2048" style="max-width: 100%; height: auto;"/>
+<img src="https://github.com/Furoshaa/2048-flutter-game/blob/main/images/jeu.png?raw=true" alt="Screenshot of the 2048 game" width="600"/>
 
-## Fonctionnalités
+## Features
 
-### 1. Interface Utilisateur
+### 1. User Interface
 
-- **Design Épuré** : L'interface est simple et intuitive, permettant aux utilisateurs de se concentrer sur le jeu.
-- **Choix de Couleur** : Les utilisateurs peuvent personnaliser l'apparence du jeu en choisissant parmi différentes palettes de couleurs.
-- **Mode Sombre** : Une option de mode sombre est disponible pour une expérience de jeu agréable dans des environnements peu éclairés.
-- **Animations Fluides** : Les mouvements des tuiles sont animés pour offrir une expérience de jeu agréable et immersive.
+- **Clean Design**: The interface is simple and intuitive, allowing users to focus on the game.
+- **Color Choice**: Users can customize the appearance of the game by choosing from different color palettes.
+- **Dark Mode**: A dark mode option is available for a pleasant gaming experience in low-light environments.
+- **Smooth Animations**: The movements of the tiles are animated to provide an enjoyable and immersive gaming experience.
 
-### 2. Mécanique de Jeu
+### 2. Game Mechanics
 
-- **Déplacement des Tuiles** : Les utilisateurs peuvent glisser les tuiles dans quatre directions (haut, bas, gauche, droite) pour les combiner.
-- **Score** : Le score augmente chaque fois que deux tuiles identiques se combinent. Le score actuel est affiché en haut de l'écran.
-- **Nouveau Jeu** : Les utilisateurs peuvent facilement recommencer une nouvelle partie à tout moment.
-- **Choix des Objectifs** : Les joueurs peuvent définir des objectifs spécifiques pour chaque partie, ajoutant un niveau de défi supplémentaire.
+- **Tile Movement**: Users can swipe the tiles in four directions (up, down, left, right) to combine them.
+- **Score**: The score increases each time two identical tiles combine. The current score is displayed at the top of the screen.
+- **New Game**: Users can easily restart a new game at any time.
+- **Goal Setting**: Players can set specific goals for each game, adding an extra level of challenge.
 
 ### 3. Notifications
 
-- **Fin de Partie** : Une notification s'affiche lorsque le joueur ne peut plus effectuer de mouvements, indiquant que la partie est terminée.
-- **Meilleur Score** : Le meilleur score est sauvegardé et affiché pour encourager les utilisateurs à battre leur record.
+- **End of Game**: A notification appears when the player can no longer make moves, indicating that the game is over.
+- **High Score**: The highest score is saved and displayed to encourage users to beat their record.
 
-## Technologies Utilisées
+## Technologies Used
 
-- **Flutter** : Framework utilisé pour le développement de l'application.
-- **Dart** : Langage de programmation utilisé pour écrire le code de l'application.
+- **Flutter**: Framework used for developing the application.
+- **Dart**: Programming language used to write the application code.
 
 ## Installation
 
-Pour installer et exécuter le projet, suivez ces étapes :
+To install and run the project, follow these steps:
 
-1. Clonez le dépôt :
+1. Clone the repository:
    ```bash
    git clone https://github.com/Furoshaa/2048-flutter-game.git
    ```
 
-2. Accédez au répertoire du projet :
+2. Navigate to the project directory:
    ```bash
    cd 2048-flutter-game
    ```
 
-3. Installez les dépendances :
+3. Install the dependencies:
    ```bash
    flutter pub get
    ```
 
-4. Exécutez l'application :
+4. Run the application:
    ```bash
    flutter run
    ```
 
 ## Conclusion
 
-Ce projet est une excellente opportunité d'apprendre Flutter tout en développant un jeu populaire. N'hésitez pas à explorer le code et à apporter vos propres améliorations !
+This project is a great opportunity to learn Flutter while developing a popular game. Feel free to explore the code and make your own improvements!
 
-## Auteurs
+## Authors
 
 - Rémi DIEU
 - Kyllian Levent
