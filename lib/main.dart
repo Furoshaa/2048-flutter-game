@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game_logic.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'dart:math' show sin, pi;
 
 class GameTheme {
   final Color backgroundColor;
@@ -105,6 +106,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   
   late AnimationController _controller;
   
+  final Map<String, Offset> _tilePositions = {};
+  
   @override
   void initState() {
     super.initState();
@@ -149,6 +152,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   void _handleKeyEvent(RawKeyEvent event) {
     if (!game.canMove) return;
     if (event is RawKeyDownEvent) {
+      _tilePositions.clear();
+      for (int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
+          if (game.board[row][col] != 0) {
+            _tilePositions['$row-$col'] = Offset(col.toDouble(), row.toDouble());
+          }
+        }
+      }
+      
       if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
         setState(() {
           _lastDirection = Direction.up;
@@ -398,226 +410,231 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        body: Stack(
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: _gridColor,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text('MOVES',
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
-                        ),
-                        Text(
-                          '${game.moves}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: _gridColor,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text('OBJECTIVE',
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
-                        ),
-                        Text(
-                          '$objective',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _gridColor,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: GestureDetector(
-                onVerticalDragEnd: (details) {
-                  if (!game.canMove) return;
-                  if (details.velocity.pixelsPerSecond.dy < 0) {
-                    setState(() {
-                      _lastDirection = Direction.up;
-                      game.move(Direction.up);
-                    });
-                  } else {
-                    setState(() {
-                      _lastDirection = Direction.down;
-                      game.move(Direction.down);
-                    });
-                  }
-                },
-                onHorizontalDragEnd: (details) {
-                  if (!game.canMove) return;
-                  if (details.velocity.pixelsPerSecond.dx < 0) {
-                    setState(() {
-                      _lastDirection = Direction.left;
-                      game.move(Direction.left);
-                    });
-                  } else {
-                    setState(() {
-                      _lastDirection = Direction.right;
-                      game.move(Direction.right);
-                    });
-                  }
-                },
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                  ),
-                  itemCount: 16,
-                  itemBuilder: (context, index) {
-                    int row = index ~/ 4;
-                    int col = index % 4;
-                    int value = game.board[row][col];
-                    
-                    if (value == 0) {
-                      return Container(
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: getTileColor(0),
-                          borderRadius: BorderRadius.circular(4),
+                          color: _gridColor,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                      );
-                    }
-
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
-                      child: TweenAnimationBuilder(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut,
-                        tween: Tween<double>(
-                          begin: 0.0,
-                          end: 1.0,
-                        ),
-                        builder: (context, double value, child) {
-                          return Transform.scale(
-                            scale: 0.8 + (value * 0.2),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: getTileColor(game.board[row][col]),
-                                borderRadius: BorderRadius.circular(4),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                        child: Column(
+                          children: [
+                            const Text('MOVES',
+                              style: TextStyle(color: Colors.white70, fontSize: 16),
+                            ),
+                            Text(
+                              '${game.moves}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
                               ),
-                              child: Center(
-                                child: Text(
-                                  '${game.board[row][col]}',
-                                  style: TextStyle(
-                                    fontSize: game.board[row][col] > 512 ? 20 : 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: getNumberColor(game.board[row][col]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: _gridColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text('OBJECTIVE',
+                              style: TextStyle(color: Colors.white70, fontSize: 16),
+                            ),
+                            Text(
+                              '$objective',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _gridColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: GestureDetector(
+                    onVerticalDragEnd: (details) {
+                      if (!game.canMove) return;
+                      if (details.velocity.pixelsPerSecond.dy < 0) {
+                        setState(() {
+                          _lastDirection = Direction.up;
+                          game.move(Direction.up);
+                        });
+                      } else {
+                        setState(() {
+                          _lastDirection = Direction.down;
+                          game.move(Direction.down);
+                        });
+                      }
+                    },
+                    onHorizontalDragEnd: (details) {
+                      if (!game.canMove) return;
+                      if (details.velocity.pixelsPerSecond.dx < 0) {
+                        setState(() {
+                          _lastDirection = Direction.left;
+                          game.move(Direction.left);
+                        });
+                      } else {
+                        setState(() {
+                          _lastDirection = Direction.right;
+                          game.move(Direction.right);
+                        });
+                      }
+                    },
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                      ),
+                      itemCount: 16,
+                      itemBuilder: (context, index) {
+                        int row = index ~/ 4;
+                        int col = index % 4;
+                        int value = game.board[row][col];
+                        
+                        if (value == 0) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: getTileColor(0),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          );
+                        }
+
+                        return TweenAnimationBuilder(
+                          duration: const Duration(milliseconds: 150),
+                          curve: Curves.easeInOut,
+                          tween: Tween<double>(
+                            begin: 0.0,
+                            end: 1.0,
+                          ),
+                          builder: (context, double t, child) {
+                            double scale = 1.0;
+                            if (value == 2 && t < 0.5) {
+                              scale = 0.5 + (t * 0.5);
+                            }
+                            
+                            return Transform.scale(
+                              scale: scale,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: getTileColor(value),
+                                  borderRadius: BorderRadius.circular(4),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 3,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    value.toString(),
+                                    style: TextStyle(
+                                      fontSize: value > 512 ? 20 : 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: getNumberColor(value),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => setState(() => game.newGame()),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8F7A66),
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                       ),
-                    );
-                  },
+                      child: const Text(
+                        'New Game',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: _showObjectiveDialog,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8F7A66),
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      ),
+                      child: const Text(
+                        'Change Objective',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () => setState(() => game.newGame()),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8F7A66),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                if (game.gameOver)
+                  Container(
+                    margin: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Game Over! Moves: ${game.moves}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                  child: const Text(
-                    'New Game',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                if (game.won)
+                  Container(
+                    margin: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade400,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'You Won! Moves: ${game.moves}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: _showObjectiveDialog,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8F7A66),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  ),
-                  child: const Text(
-                    'Change Objective',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                ),
               ],
             ),
-            if (game.gameOver)
-              Container(
-                margin: const EdgeInsets.all(20.0),
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade400,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Game Over! Moves: ${game.moves}',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            if (game.won)
-              Container(
-                margin: const EdgeInsets.all(20.0),
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade400,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'You Won! Moves: ${game.moves}',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
           ],
         ),
       ),
